@@ -415,7 +415,7 @@ public class alaram_main extends AppCompatActivity implements TimePickerDialog.O
     }
 
     public void save(){
-        SharedPreferences s1 = getSharedPreferences("task3",MODE_PRIVATE);
+        SharedPreferences s1 = getSharedPreferences("task",MODE_PRIVATE);
         SharedPreferences.Editor ed = s1.edit();
         ed.putBoolean("recursive",recursive);
         ed.putInt("ringtone_number",ringtone_number);
@@ -430,7 +430,7 @@ public class alaram_main extends AppCompatActivity implements TimePickerDialog.O
     }
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void load(){
-        SharedPreferences s2 = getSharedPreferences("task3",MODE_PRIVATE);
+        SharedPreferences s2 = getSharedPreferences("task",MODE_PRIVATE);
         recursive = s2.getBoolean("recursive",false);
         if(recursive){
             ringtone_number = s2.getInt("ringtone_number",0);
@@ -455,7 +455,7 @@ public class alaram_main extends AppCompatActivity implements TimePickerDialog.O
     }
 
     public void delete(){
-        SharedPreferences settings = getApplicationContext().getSharedPreferences("task3", Context.MODE_PRIVATE);
+        SharedPreferences settings = getApplicationContext().getSharedPreferences("task", Context.MODE_PRIVATE);
         settings.edit().remove("days_display");
         settings.edit().clear().commit();
     }

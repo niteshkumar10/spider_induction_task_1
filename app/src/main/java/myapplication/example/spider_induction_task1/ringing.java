@@ -80,7 +80,7 @@ public class ringing extends AppCompatActivity {
         }
     }
     public void load(){
-        SharedPreferences s2 = getSharedPreferences("task1",MODE_PRIVATE);
+        SharedPreferences s2 = getSharedPreferences("task",MODE_PRIVATE);
         ringtone_number = s2.getInt("ringtone_number",0);
     }
 }
