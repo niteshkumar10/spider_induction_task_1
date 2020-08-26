@@ -37,11 +37,10 @@ public class alaram_main extends AppCompatActivity implements TimePickerDialog.O
     CheckBox once,monday,tuesday,wednesday,thursday,friday,saturday,sunday;
     RadioGroup ringtone_number_selection;
     RadioButton ringtone_1,ringtone_2,ringtone_3;
-    Integer ringtone_number = 0,nxt_alarm,alarm_hour,alarm_minute,rintone_selected_no;
+    Integer ringtone_number = 0,nxt_alarm,alarm_hour,alarm_minute,rintone_selected_no,difference;
     TextView alarm_display;
     MediaPlayer player_1;
     ArrayList<Integer> days = new ArrayList<Integer>();
-    String days_tostring;
     String time,day_selected = " - ";
     Calendar c;
     Boolean recursive = false,test_recursive;
@@ -198,6 +197,11 @@ public class alaram_main extends AppCompatActivity implements TimePickerDialog.O
                 delete_alarm.setVisibility(View.INVISIBLE);
                 additional_setting.setVisibility(View.INVISIBLE);
                 ringtone_selection.setVisibility(View.INVISIBLE);
+                if(recursive){
+                    recursive = false;
+                    days.clear();
+                    save();
+                }
                 cancelAlarm();
                 alarm_display.setText("00:00 - Monday");
             }
@@ -292,12 +296,12 @@ public class alaram_main extends AppCompatActivity implements TimePickerDialog.O
             day_selected =day_selected.concat(" Sunday");
         }
         alarm_display.setText(time.concat(day_selected));
+        if(days.size() > 0)recursive = true;
     }
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void startAlarm( Calendar c) {
-        if(days.size() > 0)recursive = true;
         if(monday.isChecked() || tuesday.isChecked() || wednesday.isChecked() || thursday.isChecked() || friday.isChecked() || saturday.isChecked() || sunday.isChecked()){
-            setting_closerdate();
+            setting_closerdate(days.size());
             c.set(Calendar.DAY_OF_WEEK,nxt_alarm);
         }
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -307,10 +311,15 @@ public class alaram_main extends AppCompatActivity implements TimePickerDialog.O
         if (c.before(Calendar.getInstance())) {
             c.add(Calendar.DATE, 1);
         }
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
+        if(recursive)
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,c.getTimeInMillis(),(difference * 24 * 60 * 60 * 1000) ,pendingIntent);
+        else
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(),pendingIntent);
     }
     public void cancelAlarm() {
         recursive = false;
+        delete();
+
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, alertreciever.class);
         intent.putExtra("ringtone_number",ringtone_number);
@@ -318,63 +327,136 @@ public class alaram_main extends AppCompatActivity implements TimePickerDialog.O
         alarmManager.cancel(pendingIntent);
     }
 
-    public void setting_closerdate(){
+    public void setting_closerdate(Integer size){
         Calendar c = Calendar.getInstance();
         Integer current = c.get(Calendar.DAY_OF_WEEK);
+        Integer place = 0,same_day_place = 0;
+        Boolean has_same_day = false;
         if(monday.isChecked() || tuesday.isChecked() || wednesday.isChecked() || thursday.isChecked() || friday.isChecked() || saturday.isChecked() || sunday.isChecked()){
-            Integer small = days.get(0);
-            for(int i = 1;i < days.size(); i++){
-              if(Math.abs(current - days.get(i)) < small){
-                  small = days.get(i);
-              }
+            for(int i = 0; i < size; i++){
+                if((current - days.get(i)) == 0){
+                    has_same_day = true;
+                    same_day_place = i;
+
+                }
+                if((current - days.get(i)) <= 0){
+                    difference = current - days.get(i);
+                    nxt_alarm = days.get(i);
+                    place = i;
+                }
             }
-            nxt_alarm = small;
+            for(int i = place;i < days.size(); i++){
+                if(Math.abs(current - days.get(i)) < difference){
+                     nxt_alarm = days.get(i);
+                     difference = (current - days.get(i));
+                }
+            }
+        }
+        if(((c.get(Calendar.HOUR_OF_DAY) <= alarm_hour)  && (difference < 0) && (has_same_day))){
+            if((c.get(Calendar.MINUTE) < alarm_minute)) {
+                nxt_alarm = days.get(same_day_place);
+                difference = (current - days.get(same_day_place));
+            }
+        }
+        difference = (difference * (-1));
+
+    }
+    public void setting_closerdate_p2(Integer size){
+        Calendar c = Calendar.getInstance();
+        Integer current = c.get(Calendar.DAY_OF_WEEK);
+        Integer place = 0,same_day_place = 0;
+        Boolean has_same_day = false;
+        for(int i = 0; i < size; i++){
+            if((current - days.get(i)) == 0){
+                has_same_day = true;
+                same_day_place = i;
+            }
+            if((current - days.get(i)) <= 0){
+                difference = current - days.get(i);
+                nxt_alarm = days.get(i);
+                place = i;
+            }
+        }
+        for(int i = place;i < days.size(); i++){
+            if(Math.abs(current - days.get(i)) < difference){
+                nxt_alarm = days.get(i);
+                difference = (current - days.get(i));
+            }
+        }
+        if(((c.get(Calendar.HOUR_OF_DAY) <= alarm_hour)  && (difference < 0) && (has_same_day))){
+            if((c.get(Calendar.MINUTE) < alarm_minute)) {
+                nxt_alarm = days.get(same_day_place);
+                difference = (current - days.get(same_day_place));
+            }
+        }
+        difference = (difference * (-1));
+    }
+
+    public Integer to_one_number(){
+        Integer one_number = days.get(0);
+        for(int i = 0; i <days.size(); i++){
+            one_number = (one_number * 10) + days.get(i);
+        }
+        return one_number;
+    }
+
+    public void number_to_array(Integer num,Integer size){
+        for(int i = 0; i < size; i++){
+            days.add(num % 10);
+            num = num/10;
+        }
+        Integer j = size - 1,temp;
+        for(int i = 0; i<=j; i++){
+            temp = days.get(i);
+            days.set(i,days.get(j));
+            days.set(j,temp);
+            j--;
         }
     }
 
     public void save(){
-        SharedPreferences s1 = getSharedPreferences("task1",MODE_PRIVATE);
+        SharedPreferences s1 = getSharedPreferences("task3",MODE_PRIVATE);
         SharedPreferences.Editor ed = s1.edit();
         ed.putBoolean("recursive",recursive);
         ed.putInt("ringtone_number",ringtone_number);
         if(recursive){
-            StringBuilder str = new StringBuilder();
-            for(int i = 0; i < days.size(); i++){
-                str.append(days.get(i)).append(",");
-            }
-            ed.putString("days",str.toString());
+            ed.putInt("days",to_one_number());
             ed.putInt("number_of_days",days.size());
             ed.putInt("hour",alarm_hour);
             ed.putInt("minute",alarm_minute);
+            ed.putString("days_display",day_selected);
         }
         ed.apply();
     }
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void load(){
-        SharedPreferences s2 = getSharedPreferences("task1",MODE_PRIVATE);
-        test_recursive = s2.getBoolean("recursive",false);
-        if(test_recursive){
-            ringtone_number = s2.getInt("ringtone_number",ringtone_number);
-            days_tostring = s2.getString("days",",");
-            StringTokenizer st = new StringTokenizer(days_tostring,",");
+        SharedPreferences s2 = getSharedPreferences("task3",MODE_PRIVATE);
+        recursive = s2.getBoolean("recursive",false);
+        if(recursive){
+            ringtone_number = s2.getInt("ringtone_number",0);
             Integer days_size = s2.getInt("number_of_days",0);
-            for(int i = 0; i < days_size; i++){
-                days.set(i,Integer.parseInt(st.nextToken()));
-            }
+            Integer one_number = s2.getInt("days",0);
+            number_to_array(one_number,days_size);
             pick_time.setVisibility(View.INVISIBLE);
             delete_alarm.setVisibility(View.VISIBLE);
-            recursive = test_recursive;
             alarm_hour = s2.getInt("hour",0);
             alarm_minute = s2.getInt("minute",0);
+            day_selected = s2.getString("days_display","");
             Calendar d = Calendar.getInstance();
             d.set(Calendar.HOUR_OF_DAY, alarm_hour);
             d.set(Calendar.MINUTE, alarm_minute);
             d.set(Calendar.SECOND, 0);
-            setting_closerdate();
+            setting_closerdate_p2(days_size);
             d.set(Calendar.DAY_OF_WEEK,nxt_alarm);
             time = DateFormat.getTimeInstance(DateFormat.SHORT).format(d.getTime());
-            alarm_display.setText(time);
+            alarm_display.setText(time.concat(day_selected));
             startAlarm(d);
         }
+    }
+
+    public void delete(){
+        SharedPreferences settings = getApplicationContext().getSharedPreferences("task3", Context.MODE_PRIVATE);
+        settings.edit().remove("days_display");
+        settings.edit().clear().commit();
     }
 }
