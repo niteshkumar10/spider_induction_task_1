@@ -74,15 +74,6 @@
         app:layout_constraintVertical_bias="0.794">
 
         <RadioButton
-            android:id="@+id/default_ringtone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="DEFAULT RINGTONE"
-            android:textColor="@color/design_default_color_on_secondary"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <RadioButton
             android:id="@+id/ringtone_1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -213,4 +204,28 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.377" />
+
+    <Button
+        android:id="@+id/confirm_1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CONFIRM"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.817"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.916" />
+
+    <Button
+        android:id="@+id/confirm_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CONFIRM"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.817"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.916" />
 </androidx.constraintlayout.widget.ConstraintLayout>
